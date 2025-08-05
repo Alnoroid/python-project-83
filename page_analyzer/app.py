@@ -1,5 +1,6 @@
 import psycopg2
 import os
+import requests
 from datetime import datetime
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, flash, make_response, redirect, url_for
@@ -43,9 +44,9 @@ def add_urls():
 
 @app.get('/urls')
 def get_urls():
-    sql = ("SELECT urls.id, urls.name, MAX(url_checks.created_at) AS last_check_date FROM urls "
-           "LEFT JOIN url_checks ON urls.id = url_checks.url_id GROUP BY urls.id"
-           " ORDER BY urls.created_at DESC;")
+    sql = ("SELECT urls.id, urls.name, uc.created_at as last_check_date, uc.status_code FROM urls LEFT JOIN url_checks uc ON uc.id = "
+           "(SELECT id FROM url_checks WHERE urls.id = url_id ORDER BY created_at DESC LIMIT 1) ORDER BY urls.created_at DESC")
+
     with conn.cursor() as curs:
         curs.execute(sql)
         urls = curs.fetchall()
@@ -78,12 +79,24 @@ def get_url(url_id):
 
 @app.post('/urls/<int:url_id>/checks')
 def check_url(url_id):
-    sql = f"INSERT INTO url_checks (url_id, created_at) VALUES ('{url_id}', '{datetime.today()}');"
     try:
+        sql = f"SELECT * FROM urls WHERE id = {url_id}"
         with conn.cursor() as curs:
             curs.execute(sql)
-            conn.commit()
-            flash('URL успешно проверен', 'success')
+            url = curs.fetchone()
+
+        response = requests.get(url[1])
+        response.raise_for_status()
+        code = response.status_code
+        if code == 200:
+            sql = f"INSERT INTO url_checks (url_id,status_code, created_at) VALUES ('{url_id}','{code}','{datetime.today()}');"
+            with conn.cursor() as curs:
+                curs.execute(sql)
+                conn.commit()
+                flash('URL успешно проверен', 'success')
+        else:
+            request.raise_for_status()
+
     except Exception as e:
         conn.rollback()
         flash(f'Ошибка при проверке URL: {str(e)}', 'danger')
