@@ -1,0 +1,14 @@
+{% extends "layouts/application.html" %}
+{% block title %}Страница не найдена{% endblock %}
+{% block main %}
+{% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" role="alert" >{{ message }}</div>
+        {% endfor %}
+   {% endif %}
+{% endwith %}
+    <h1>Страница не найдена</h1>
+    <p>Здесь нет того, что вы ищете</p>
+    <a href="/">Вернуться на главную</a>
+{% endblock %}

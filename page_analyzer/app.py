@@ -2,7 +2,7 @@ import psycopg2
 import os
 from datetime import datetime
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, flash, make_response, redirect, url_for, get_flashed_messages
+from flask import Flask, render_template, request, flash, make_response, redirect, url_for
 from page_analyzer.models.url import url_validate, normalize_url
 
 load_dotenv()
@@ -26,24 +26,26 @@ def add_urls():
     if error_txt is not None:
         flash(error_txt, 'danger')
         return redirect(url_for('root'), 302)
-    else:
-        url_string = normalize_url(url)
-        sql = f"INSERT INTO urls (name, created_at) VALUES ('{url_string}', '{datetime.today()}');"
-        try:
-            with conn.cursor() as curs:
-                curs.execute(sql)
-                conn.commit()
-                flash('URL успешно добавлен', 'success')
-        except Exception as e:
-            conn.rollback()
-            flash(f'Ошибка при добавлении URL: {str(e)}', 'danger')
-            return redirect(url_for('root'), 302)
 
+    url_string = normalize_url(url)
+    sql = f"INSERT INTO urls (name, created_at) VALUES ('{url_string}', '{datetime.today()}');"
+    try:
+        with conn.cursor() as curs:
+            curs.execute(sql)
+            conn.commit()
+            flash('URL успешно добавлен', 'success')
+            return redirect(url_for('root'), 302)
+    except Exception as e:
+        conn.rollback()
+        flash(f'Ошибка при добавлении URL: {str(e)}', 'danger')
         return redirect(url_for('root'), 302)
+        # return redirect(url_for('get_url', ), 302)
 
 @app.get('/urls')
 def get_urls():
-    sql = "SELECT * FROM urls ORDER BY created_at DESC;"
+    sql = ("SELECT urls.id, urls.name, MAX(url_checks.created_at) AS last_check_date FROM urls "
+           "LEFT JOIN url_checks ON urls.id = url_checks.url_id GROUP BY urls.id"
+           " ORDER BY urls.created_at DESC;")
     with conn.cursor() as curs:
         curs.execute(sql)
         urls = curs.fetchall()
@@ -53,18 +55,41 @@ def get_urls():
         urls=urls
     )
 
-@app.get('/urls/<int:id>')
-def get_url(id):
-    sql = f"SELECT * FROM urls WHERE id = {id}"
+@app.get('/urls/<int:url_id>')
+def get_url(url_id):
+    sql = f"SELECT * FROM urls WHERE id = {url_id}"
     with conn.cursor() as curs:
         curs.execute(sql)
         url = curs.fetchone()
 
+    sql = f"SELECT * FROM url_checks WHERE url_id = {url_id} ORDER BY created_at DESC;"
+    with conn.cursor() as curs:
+        curs.execute(sql)
+        url_checks = curs.fetchall()
+
     if not url:
-        flash('Страницы не существует', 'danger')
-        return redirect(url_for('root'), 302)
+        return render_template('views/404.html'), 404
 
     return render_template(
         'views/url.html',
-        url=url
+        url=url,
+        url_checks=url_checks
     )
+
+@app.post('/urls/<int:url_id>/checks')
+def check_url(url_id):
+    sql = f"INSERT INTO url_checks (url_id, created_at) VALUES ('{url_id}', '{datetime.today()}');"
+    try:
+        with conn.cursor() as curs:
+            curs.execute(sql)
+            conn.commit()
+            flash('URL успешно проверен', 'success')
+    except Exception as e:
+        conn.rollback()
+        flash(f'Ошибка при проверке URL: {str(e)}', 'danger')
+
+    return redirect(url_for('get_url', url_id=url_id)), 302
+
+
+if __name__ == '__main__':
+    app.run()

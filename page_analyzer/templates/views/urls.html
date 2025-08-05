@@ -27,7 +27,7 @@
             <td>
                 <a href="/urls/{{ url[0] }}">{{ url[1] }}</a>
             </td>
-            <td></td>
+            <td>{{ url[2].strftime("%Y-%m-%d") }}</td>
             <td></td>
         </tr>
         {% endfor %}
