@@ -56,6 +56,7 @@ def add_url():
         flash('URL уже существует', 'danger')
 
     new_url = url_repo.create_url(url_string)
+    flash('Страница успешно добавлена', 'success')
     return redirect(url_for('get_url', url_id = new_url ), 302)
 
 
