@@ -1,9 +1,24 @@
 import os
+
 import requests
 from dotenv import load_dotenv
-from flask import Flask,abort, render_template, request, flash, redirect, url_for
-from page_analyzer.models.url import UrlRepository, url_validate, normalize_url, get_data
+from flask import (
+    Flask,
+    abort,
+    flash,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
+
 from page_analyzer.database import Database
+from page_analyzer.models.url import (
+    UrlRepository,
+    get_data,
+    normalize_url,
+    url_validate,
+)
 
 load_dotenv()
 
@@ -13,9 +28,11 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 db = Database(os.getenv('DATABASE_URL'))
 url_repo = UrlRepository(db)
 
+
 @app.get('/')
 def root():
     return render_template('views/index.html')
+
 
 @app.get('/urls')
 def get_urls():
@@ -25,6 +42,7 @@ def get_urls():
         'views/urls.html',
         urls=urls
     )
+
 
 @app.get('/urls/<int:url_id>')
 def get_url(url_id):
@@ -40,6 +58,7 @@ def get_url(url_id):
         url=url,
         url_checks=url_checks
     )
+
 
 @app.post('/urls')
 def add_url():
@@ -72,7 +91,13 @@ def check_url(url_id):
         response.raise_for_status()
         code = response.status_code
         title, h1, description = get_data(response.text)
-        data = {"id": url_id, "status_code": code, "title": title, "h1": h1, "description": description}
+        data = {
+            "id": url_id,
+            "status_code": code,
+            "title": title,
+            "h1": h1,
+            "description": description
+        }
         url_repo.create_url_check(data)
         flash('Страница успешно проверена', 'success')
     except Exception:

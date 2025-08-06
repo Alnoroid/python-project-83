@@ -1,6 +1,8 @@
-from validators.url import url as url_validator
 from urllib.parse import urlparse
+
 from bs4 import BeautifulSoup
+from validators.url import url as url_validator
+
 
 class UrlRepository:
     def __init__(self, db):
@@ -48,8 +50,15 @@ class UrlRepository:
     def create_url_check(self, data):
         result = self.db.execute(
             '''
-            INSERT INTO url_checks (url_id, status_code, title, h1, description) VALUES (%s, %s, %s, %s, %s)
-            ''', (data['id'], data['status_code'], data['title'], data['h1'], data['description'])
+            INSERT INTO 
+                url_checks (url_id, status_code, title, h1, description) 
+            VALUES (%s, %s, %s, %s, %s)
+            ''',
+            (data['id'],
+             data['status_code'],
+             data['title'],
+             data['h1'],
+             data['description'])
         )
         return result
 
@@ -64,6 +73,7 @@ def url_validate(url):
         error_txt = 'Некорректный URL'
     return error_txt
 
+
 def normalize_url(url):
     parsed = urlparse(url)
     first_part = f'{parsed.scheme}://'
@@ -76,6 +86,7 @@ def normalize_url(url):
     url_string = f'{first_part}{second_part}'
 
     return url_string
+
 
 def get_data(response_html):
     content = BeautifulSoup(response_html, 'html.parser')
