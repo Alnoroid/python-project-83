@@ -75,8 +75,8 @@ def check_url(url_id):
         data = {"id": url_id, "status_code": code, "title": title, "h1": h1, "description": description}
         url_repo.create_url_check(data)
         flash('Страница успешно проверена', 'success')
-    except Exception as e:
-        flash(f'Произошла ошибка при проверке', 'danger')
+    except Exception:
+        flash('Произошла ошибка при проверке', 'danger')
         raise
 
     return redirect(url_for('get_url', url_id=url_id))
