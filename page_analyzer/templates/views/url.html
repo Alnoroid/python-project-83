@@ -1,5 +1,5 @@
 {% extends "layouts/application.html" %}
-{% block title %}Сайт {{ url[1] }}{% endblock %}
+{% block title %}Сайт {{ url.name }}{% endblock %}
 {% block main %}
 {% with messages = get_flashed_messages(with_categories=True) %}
     {% if messages %}
@@ -8,22 +8,22 @@
         {% endfor %}
    {% endif %}
 {% endwith %}
-<h1>Сайт {{ url[1] }}</h1>
+<h1>Сайт {{ url.name }}</h1>
 
     <div class="table-responsive">
     <table class="table table-bordered table-hover text-nowrap" data-test="url">
       <tbody>
         <tr>
           <td>ID</td>
-          <td>{{ url[0] }}</td>
+          <td>{{ url.id }}</td>
         </tr>
         <tr>
           <td>Имя</td>
-          <td>{{ url[1] }}</td>
+          <td>{{ url.name }}</td>
         </tr>
         <tr>
           <td>Дата создания</td>
-          <td>{{ url[2].strftime("%Y-%m-%d") }}</td>
+          <td>{{ url.created_at.strftime("%Y-%m-%d") }}</td>
         </tr>
       </tbody>
     </table>
@@ -48,11 +48,11 @@
       <tbody>
       {% for check in url_checks %}
         <tr>
-            <td>{{ check[0] }}</td>
-            <td>{{ check[2] }}</td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td>{{ check.id }}</td>
+            <td>{{ check.status_code }}</td>
+            <td>{{ check.h1 }}</td>
+            <td>{{ check.title }}</td>
+            <td>{{ check.description }}</td>
             <td>{{ check[6].strftime("%Y-%m-%d") }}</td>
         </tr>
       {% endfor %}
