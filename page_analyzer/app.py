@@ -54,7 +54,7 @@ def add_url():
     url_check = url_repo.find_by_name(url_string)
     if url_check is not None:
         flash('Страница уже существует', 'danger')
-        return redirect(url_for('root'))
+        return redirect(url_for('get_url', url_id=url_check[0]))
     try:
         new_url = url_repo.create_url(url_string)
         flash('Страница успешно добавлена', 'success')
@@ -74,7 +74,7 @@ def check_url(url_id):
         title, h1, description = get_data(response.text)
         data = {"id": url_id, "status_code": code, "title": title, "h1": h1, "description": description}
         url_repo.create_url_check(data)
-        flash('URL успешно проверен', 'success')
+        flash('Страница успешно проверена', 'success')
     except Exception as e:
         flash(f'Ошибка при проверке URL: {str(e)}', 'danger')
         raise
