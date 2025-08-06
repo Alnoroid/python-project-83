@@ -51,6 +51,7 @@ class UrlRepository:
             INSERT INTO url_checks (url_id, status_code, title, h1, description) VALUES (%s, %s, %s, %s, %s)
             ''', (data['id'], data['status_code'], data['title'], data['h1'], data['description'])
         )
+        return result
 
 
 def url_validate(url):
