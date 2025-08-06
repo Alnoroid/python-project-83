@@ -76,15 +76,10 @@ def check_url(url_id):
         url_repo.create_url_check(data)
         flash('Страница успешно проверена', 'success')
     except Exception as e:
-        flash(f'Ошибка при проверке URL: {str(e)}', 'danger')
+        flash(f'Произошла ошибка при проверке', 'danger')
         raise
 
-    url_checks = url_repo.get_url_checks(url_id)
-    return render_template(
-        'views/url.html',
-        url=url,
-        url_checks=url_checks
-    )
+    return redirect(url_for('get_url', url_id=url_id))
 
 
 @app.errorhandler(404)
