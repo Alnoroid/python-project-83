@@ -59,7 +59,7 @@ def add_url():
         new_url = url_repo.create_url(url_string)
         flash('Страница успешно добавлена', 'success')
         return redirect(url_for('get_url', url_id=new_url))
-    except Exception as e:
+    except Exception:
         flash('Ошибка при добавлении страницы', 'danger')
         return redirect(url_for('root'))
 
@@ -90,6 +90,3 @@ def check_url(url_id):
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template('views/404.html'), 404
-
-if __name__ == '__main__':
-    app.run()
