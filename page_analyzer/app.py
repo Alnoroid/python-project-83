@@ -53,11 +53,15 @@ def add_url():
 
     url_check = url_repo.find_by_name(url_string)
     if url_check is not None:
-        flash('URL уже существует', 'danger')
-
-    new_url = url_repo.create_url(url_string)
-    flash('Страница успешно добавлена', 'success')
-    return redirect(url_for('get_url', url_id = new_url ), 302)
+        flash('Страница уже существует', 'danger')
+        return redirect(url_for('root'))
+    try:
+        new_url = url_repo.create_url(url_string)
+        flash('Страница успешно добавлена', 'success')
+        return redirect(url_for('get_url', url_id=new_url))
+    except Exception as e:
+        flash('Ошибка при добавлении страницы', 'danger')
+        return redirect(url_for('root'))
 
 
 @app.post('/urls/<int:url_id>/checks')
@@ -86,3 +90,6 @@ def check_url(url_id):
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template('views/404.html'), 404
+
+if __name__ == '__main__':
+    app.run()
