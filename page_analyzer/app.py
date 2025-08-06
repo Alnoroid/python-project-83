@@ -77,8 +77,6 @@ def check_url(url_id):
         flash('Страница успешно проверена', 'success')
     except Exception:
         flash('Произошла ошибка при проверке', 'danger')
-        raise
-
     return redirect(url_for('get_url', url_id=url_id))
 
 
